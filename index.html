@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apdoul Smartboy OTP Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+    .form-box { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px gray; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; }
+    h2 { text-align: center; color: #007BFF; }
+  </style>
+</head>
+<body>
+
+<div class="form-box">
+  <h2>Apdoul Smartboy Verification</h2>
+
+  <div id="step1">
+    <input type="email" id="email" placeholder="Enter your email">
+    <button onclick="sendOTP()">Send OTP</button>
+  </div>
+
+  <div id="step2" style="display:none;">
+    <input type="text" id="otp_input" placeholder="Enter OTP">
+    <button onclick="verifyOTP()">Verify OTP</button>
+    <p id="otpStatus"></p>
+  </div>
+
+  <div id="step3" style="display:none;">
+    <input type="text" id="fullname" placeholder="Full Name">
+    <input type="text" id="phone" placeholder="Phone Number">
+    <textarea id="info" placeholder="Other Information"></textarea>
+    <button onclick="submitForm()">Submit Form</button>
+    <p id="submitStatus"></p>
+  </div>
+</div>
+
+<script>
+  emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+
+  let generatedOTP = "";
+  let otpTime = 0;
+
+  function sendOTP() {
+    const email = document.getElementById("email").value;
+    if (!email) return alert("Please enter email");
+
+    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    otpTime = Date.now();
+
+    const params = {
+      to_email: email,
+      otp: generatedOTP
+    };
+
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID_OTP", params)
+      .then(() => {
+        alert("OTP sent to your email");
+        document.getElementById("step1").style.display = "none";
+        document.getElementById("step2").style.display = "block";
+      })
+      .catch((err) => alert("Failed to send OTP: " + err));
+  }
+
+  function verifyOTP() {
+    const userOTP = document.getElementById("otp_input").value;
+    const now = Date.now();
+
+    if ((now - otpTime) > 60000) {
+      document.getElementById("otpStatus").innerText = "OTP expired. Try again.";
+    } else if (userOTP === generatedOTP) {
+      document.getElementById("otpStatus").innerText = "OTP verified!";
+      document.getElementById("step2").style.display = "none";
+      document.getElementById("step3").style.display = "block";
+    } else {
+      document.getElementById("otpStatus").innerText = "Incorrect OTP.";
+    }
+  }
+
+  function submitForm() {
+    const params = {
+      to_email: "abdulazizbello804@gmail.com",
+      fullname: document.getElementById("fullname").value,
+      phone: document.getElementById("phone").value,
+      info: document.getElementById("info").value
+    };
+
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID_FORM", params)
+      .then(() => {
+        document.getElementById("submitStatus").innerText = "Form submitted! Wait for admin approval.";
+      })
+      .catch((err) => alert("Error sending form: " + err));
+  }
+</script>
+
+</body>
+</html>
